@@ -52,7 +52,7 @@ body {
 .card {
   opacity: 0;
   transform: translateX(-100px);
-  transition: 150ms;
+  transition: 350ms;
   border-radius: 30px;
   background: #f5f5f5;
   box-shadow: 8px 8px 15px #e4e4e4, -8px -8px 15px #ffffff;
@@ -77,4 +77,53 @@ body {
 }
 .card.hide {
   display: none;
+}
+
+/* loader styles */
+
+.loader-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 50;
+}
+
+.loader,
+.loader-inner,
+.loader-circle {
+  padding: 5px;
+  display: grid;
+  place-items: center;
+}
+
+.loader {
+  width: fit-content;
+  margin-inline: auto;
+}
+
+.loader-inner {
+  width: 40px;
+  height: 40px;
+}
+
+.loader-circle {
+  border: 3px solid #f5f5f5;
+  border-top: 3px solid#2c3e50;
+  border-radius: 30px;
+  animation: spin 0.5s linear forwards infinite;
+}
+
+.loader-text {
+  text-align: center;
+  margin-top: 30px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

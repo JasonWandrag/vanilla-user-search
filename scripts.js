@@ -2,6 +2,7 @@ const userCardTemplate = document.querySelector("[data-user-card]");
 const userCardContainer = document.querySelector("[data-user-cards-container]");
 const searchInput = document.querySelector("[data-search]");
 const genderFilter = document.querySelector("[data-gender-filter]");
+const loader = document.querySelector("[loader]");
 
 const people = new Promise((resolve, reject) => {
   fetch("https://randomuser.me/api/?results=1000")
@@ -10,7 +11,10 @@ const people = new Promise((resolve, reject) => {
       createUserCards(data.results);
       resolve(data.results);
     })
-    .catch((err) => reject(err));
+    .catch((err) => reject(err))
+    .finally(() => {
+      loader.style.display = "none";
+    });
 });
 
 // Animation Observer to add a "show" class to items on screen
