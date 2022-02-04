@@ -10,9 +10,11 @@ const people = new Promise((resolve, reject) => {
     .then((data) => {
       const paginatedList = splitArray(data.results, 15);
       const currentLoaded = 0;
-      createUserCards(paginatedList[currentLoaded]);
+      let loadedList = [];
+      createUserCards(paginatedList[currentLoaded], currentLoaded);
+      loadedList = [...loadedList, ...paginatedList[currentLoaded]];
       lastCardObserver.observe(document.querySelector(".card:last-child"));
-      resolve({ paginatedList, currentLoaded });
+      resolve({ paginatedList, currentLoaded, loadedList });
     })
     .catch((err) => reject(err))
     .finally(() => {
@@ -48,11 +50,15 @@ function loadNewCards() {
       lastCardObserver.unobserve(document.querySelector(".card:last-child"));
       return console.log("End of list");
     }
-    createUserCards(data.paginatedList[data.currentLoaded]);
+    data.loadedList = [
+      ...data.loadedList,
+      ...data.paginatedList[data.currentLoaded],
+    ];
+    createUserCards(data.paginatedList[data.currentLoaded], data.currentLoaded);
   });
 }
 
-function createUserCards(people) {
+function createUserCards(people, arrIdx) {
   return people.map((person, idx) => {
     // Create card from HTML template
     const card = userCardTemplate.content.cloneNode(true).children[0];
@@ -62,7 +68,11 @@ function createUserCards(people) {
     const details = card.querySelector("[data-details]");
     // Add card data
     cardIdx = document.createAttribute("data-id");
-    cardIdx.value = idx;
+
+    // since I am creating arrays 15 at a time,
+    // I need to multiply 15 by the current array I am creating
+    // so that each ID remains unique
+    cardIdx.value = arrIdx * 15 + idx;
     card.setAttributeNode(cardIdx);
     card.style.background = `linear-gradient(0deg, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.1)), url(${person.picture.large})`;
     name.textContent = `${person.name.title} ${person.name.first} ${person.name.last}`;
@@ -89,7 +99,7 @@ searchInput.addEventListener("input", (e) => {
   const value = e.target.value.toLowerCase();
   return people.then((people) => {
     console.log(people);
-    people.paginatedList[people.currentLoaded].forEach((person, index) => {
+    people.loadedList.forEach((person, index) => {
       const isVisible =
         person.name.first.toLowerCase().includes(value) ||
         person.name.last.toLowerCase().includes(value);
@@ -107,7 +117,7 @@ genderFilter.addEventListener("change", (e) => {
       .querySelectorAll("[data-id]")
       .forEach((el) => el.classList.remove("hide"));
   return people.then((people) => {
-    people.forEach((person, index) => {
+    people.loadedList.forEach((person, index) => {
       const isVisible = person.gender == gender;
       document
         .querySelector(`[data-id="${index}"]`)
