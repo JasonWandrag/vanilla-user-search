@@ -67,7 +67,6 @@ const lastCardObserver = new IntersectionObserver((entries) => {
       ...data.loadedList,
       ...data.paginatedList[data.currentLoaded],
     ];
-
     createUserCards(data.paginatedList[data.currentLoaded]);
   });
 
@@ -112,18 +111,19 @@ function splitArray(arr, len) {
 searchInput.addEventListener("input", (e) => {
   const value = e.target.value.toLowerCase();
   return people
-    .then((people) => {
-      foundPeople = people.loadedList.filter((person) => {
+    .then(({ loadedList }) => {
+      const foundPeople = loadedList.filter((person) => {
         return (
           person.name.first.toLowerCase().includes(value) ||
           person.name.last.toLowerCase().includes(value)
         );
       });
 
-      people.loadedList.forEach((person) => {
+      loadedList.forEach((person) => {
         const isVisible = foundPeople.some(
           (p) => p.login.uuid === person.login.uuid
         );
+
         document
           .querySelector(`[data-id="${person.login.uuid}"]`)
           .classList.toggle("hide", !isVisible);
@@ -145,8 +145,8 @@ genderFilter.addEventListener("change", (e) => {
     return document
       .querySelectorAll("[data-id]")
       .forEach((el) => el.classList.remove("hide"));
-  return people.then((people) => {
-    people.loadedList.forEach((person) => {
+  return people.then(({ loadedList }) => {
+    loadedList.forEach((person) => {
       const isVisible = person.gender == gender;
       document
         .querySelector(`[data-id="${person.login.uuid}"]`)
