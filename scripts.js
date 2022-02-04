@@ -98,7 +98,6 @@ function splitArray(arr, len) {
 searchInput.addEventListener("input", (e) => {
   const value = e.target.value.toLowerCase();
   return people.then((people) => {
-    console.log(people);
     people.loadedList.forEach((person, index) => {
       const isVisible =
         person.name.first.toLowerCase().includes(value) ||

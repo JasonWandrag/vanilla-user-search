@@ -7,6 +7,7 @@
     <title>User Search</title>
     <link rel="stylesheet" href="./style.css" />
     <script src="./scripts.js" defer></script>
+    <script src="./theme.js" defer></script>
   </head>
   <body>
     <div class="search-wrapper">
@@ -22,6 +23,16 @@
         <option value="male">Male</option>
         <option value="female">Female</option>
       </select>
+      <label for="color">
+        Theme
+        <input
+          id="color"
+          type="color"
+          name="color"
+          value="#f5f5f5"
+          data-color-picker
+        />
+      </label>
     </div>
     <div data-user-cards-container class="cards-container"></div>
     <div class="loader-container" loader>
