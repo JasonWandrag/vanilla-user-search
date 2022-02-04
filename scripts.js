@@ -8,8 +8,11 @@ const people = new Promise((resolve, reject) => {
   fetch("https://randomuser.me/api/?results=1000")
     .then((res) => res.json())
     .then((data) => {
-      createUserCards(data.results);
-      resolve(data.results);
+      const paginatedList = splitArray(data.results, 15);
+      const currentLoaded = 0;
+      createUserCards(paginatedList[currentLoaded]);
+      lastCardObserver.observe(document.querySelector(".card:last-child"));
+      resolve({ paginatedList, currentLoaded });
     })
     .catch((err) => reject(err))
     .finally(() => {
@@ -18,7 +21,7 @@ const people = new Promise((resolve, reject) => {
 });
 
 // Animation Observer to add a "show" class to items on screen
-const observer = new IntersectionObserver(
+const animationObserver = new IntersectionObserver(
   (entries) => {
     entries.forEach((entry) => {
       entry.target.classList.toggle("show", entry.isIntersecting);
@@ -28,6 +31,22 @@ const observer = new IntersectionObserver(
     threshold: 0.5,
   }
 );
+
+// Lazy loader observer
+const lastCardObserver = new IntersectionObserver((entries) => {
+  const lastCard = entries[0];
+  if (!lastCard.isIntersecting) return;
+  loadNewCards();
+  lastCardObserver.unobserve(lastCard.target);
+  lastCardObserver.observe(document.querySelector(".card:last-child"));
+}, {});
+
+function loadNewCards() {
+  people.then((data) => {
+    data.currentLoaded += 1;
+    createUserCards(data.paginatedList[data.currentLoaded]);
+  });
+}
 
 function createUserCards(people) {
   return people.map((person, idx) => {
@@ -47,15 +66,26 @@ function createUserCards(people) {
     // Add card to DOM
     userCardContainer.append(card);
     // Start observing for animation
-    observer.observe(card);
+    animationObserver.observe(card);
   });
 }
 
-// Search Functionality
+// This is used on my people array,
+// to split it up so I can lazyload elements,
+// instead of trying to load them all at once
+function splitArray(arr, len) {
+  const chunks = [];
+  while (arr.length > 0) {
+    chunks.push(arr.splice(0, len));
+  }
+  return chunks;
+}
+
 searchInput.addEventListener("input", (e) => {
   const value = e.target.value.toLowerCase();
   return people.then((people) => {
-    people.forEach((person, index) => {
+    console.log(people);
+    people.paginatedList[people.currentLoaded].forEach((person, index) => {
       const isVisible =
         person.name.first.toLowerCase().includes(value) ||
         person.name.last.toLowerCase().includes(value);
