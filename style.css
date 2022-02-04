@@ -104,6 +104,11 @@ label {
   display: none;
 }
 
+[data-error] {
+  text-align: center;
+  padding: 10%;
+}
+
 /* loader styles */
 
 .loader-container {

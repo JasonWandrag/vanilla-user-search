@@ -2,6 +2,7 @@ const userCardTemplate = document.querySelector("[data-user-card]");
 const userCardContainer = document.querySelector("[data-user-cards-container]");
 const searchInput = document.querySelector("[data-search]");
 const genderFilter = document.querySelector("[data-gender-filter]");
+const errorContainer = document.querySelector("[data-error]");
 const loader = document.querySelector("[loader]");
 
 const people = new Promise((resolve, reject) => {
@@ -18,7 +19,7 @@ const people = new Promise((resolve, reject) => {
       let loadedList = [];
       loadedList = [...loadedList, ...paginatedList[currentLoaded]];
 
-      createUserCards(paginatedList[currentLoaded], currentLoaded);
+      createUserCards(paginatedList[currentLoaded]);
 
       // Start observing last card created for lazy loading next data
       lastCardObserver.observe(document.querySelector(".card:last-child"));
@@ -58,7 +59,7 @@ const lastCardObserver = new IntersectionObserver((entries) => {
     // If it has, then stop observing for increased page performance
     if (data.currentLoaded >= data.paginatedList.length) {
       lastCardObserver.unobserve(document.querySelector(".card:last-child"));
-      return console.log("End of list");
+      return (errorContainer.textContent = "End of list");
     }
 
     // Update this list, for search/filtering to include new cards being loaded
@@ -67,7 +68,7 @@ const lastCardObserver = new IntersectionObserver((entries) => {
       ...data.paginatedList[data.currentLoaded],
     ];
 
-    createUserCards(data.paginatedList[data.currentLoaded], data.currentLoaded);
+    createUserCards(data.paginatedList[data.currentLoaded]);
   });
 
   // Since the old card is no longer the last card, unobserve the current card and observe new last card
@@ -75,8 +76,8 @@ const lastCardObserver = new IntersectionObserver((entries) => {
   lastCardObserver.observe(document.querySelector(".card:last-child"));
 });
 
-function createUserCards(people, arrIdx) {
-  return people.map((person, idx) => {
+function createUserCards(people) {
+  return people.map((person) => {
     // Create card from HTML template
     const card = userCardTemplate.content.cloneNode(true).children[0];
 
@@ -85,11 +86,7 @@ function createUserCards(people, arrIdx) {
     const details = card.querySelector("[data-details]");
     // Add card data
     cardIdx = document.createAttribute("data-id");
-
-    // since I am creating arrays 15 at a time,
-    // I need to multiply 15 by the current array I am creating
-    // so that each ID remains unique
-    cardIdx.value = arrIdx * 15 + idx;
+    cardIdx.value = person.login.uuid;
     card.setAttributeNode(cardIdx);
     card.style.background = `linear-gradient(0deg, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.1)), url(${person.picture.large})`;
     name.textContent = `${person.name.title} ${person.name.first} ${person.name.last}`;
@@ -114,16 +111,32 @@ function splitArray(arr, len) {
 
 searchInput.addEventListener("input", (e) => {
   const value = e.target.value.toLowerCase();
-  return people.then((people) => {
-    people.loadedList.forEach((person, index) => {
-      const isVisible =
-        person.name.first.toLowerCase().includes(value) ||
-        person.name.last.toLowerCase().includes(value);
-      document
-        .querySelector(`[data-id="${index}"]`)
-        .classList.toggle("hide", !isVisible);
+  return people
+    .then((people) => {
+      foundPeople = people.loadedList.filter((person) => {
+        return (
+          person.name.first.toLowerCase().includes(value) ||
+          person.name.last.toLowerCase().includes(value)
+        );
+      });
+
+      people.loadedList.forEach((person) => {
+        const isVisible = foundPeople.some(
+          (p) => p.login.uuid === person.login.uuid
+        );
+        document
+          .querySelector(`[data-id="${person.login.uuid}"]`)
+          .classList.toggle("hide", !isVisible);
+      });
+      if (foundPeople.length == 0) {
+        throw new Error("No people by that name found");
+      } else {
+        errorContainer.textContent = "";
+      }
+    })
+    .catch((err) => {
+      errorContainer.textContent = err;
     });
-  });
 });
 
 genderFilter.addEventListener("change", (e) => {
@@ -133,10 +146,10 @@ genderFilter.addEventListener("change", (e) => {
       .querySelectorAll("[data-id]")
       .forEach((el) => el.classList.remove("hide"));
   return people.then((people) => {
-    people.loadedList.forEach((person, index) => {
+    people.loadedList.forEach((person) => {
       const isVisible = person.gender == gender;
       document
-        .querySelector(`[data-id="${index}"]`)
+        .querySelector(`[data-id="${person.login.uuid}"]`)
         .classList.toggle("hide", !isVisible);
     });
   });
