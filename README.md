@@ -10,3 +10,7 @@ In this project, I challenged myself to use only HTML/CSS/JS features to create 
 - Scroll animations are applied using another `IntersectionObserver` to see which cards are on screen
 - Created a dynamic Neumorphic theme changer, by creating dynamic top and bottom shadows, as well as keeping text legible.
 - Search/Filtering on the `Promise`
+
+## Live Link
+
+You can view this project with this link: https://im-proud-of-this.netlify.app/
