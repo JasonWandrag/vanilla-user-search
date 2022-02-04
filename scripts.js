@@ -39,11 +39,15 @@ const lastCardObserver = new IntersectionObserver((entries) => {
   loadNewCards();
   lastCardObserver.unobserve(lastCard.target);
   lastCardObserver.observe(document.querySelector(".card:last-child"));
-}, {});
+});
 
 function loadNewCards() {
   people.then((data) => {
     data.currentLoaded += 1;
+    if (data.currentLoaded >= data.paginatedList.length) {
+      lastCardObserver.unobserve(document.querySelector(".card:last-child"));
+      return console.log("End of list");
+    }
     createUserCards(data.paginatedList[data.currentLoaded]);
   });
 }
