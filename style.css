@@ -46,7 +46,7 @@ label {
   padding: 20px;
   border: none;
   outline: none;
-  width: 49%;]
+  width: 49%;
 }
 
 .search-wrapper input,
@@ -59,7 +59,6 @@ label {
 [data-color-picker] {
   display: none;
 }
-
 
 /* Card Styles */
 .cards-container {
