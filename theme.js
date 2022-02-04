@@ -1,3 +1,7 @@
+// This is my custom color theme creator for neumorphic colors.
+// All shadows are generated according to color picked
+// Colors are updated by changing CSS variable values
+
 const colorPicker = document.querySelector("[data-color-picker]");
 let cssVariables = document.querySelector(":root");
 
@@ -125,6 +129,7 @@ function invertColor(hex) {
   return "#" + padZero(r) + padZero(g) + padZero(b);
 }
 
+// Used to ensure hex values are valid
 function padZero(str, len) {
   len = len || 2;
   var zeros = new Array(len).join("0");

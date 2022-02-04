@@ -8,11 +8,19 @@ const people = new Promise((resolve, reject) => {
   fetch("https://randomuser.me/api/?results=1000")
     .then((res) => res.json())
     .then((data) => {
+      // The array is split for lazy loading
       const paginatedList = splitArray(data.results, 15);
+
+      // Select which array is loaded
       const currentLoaded = 0;
+
+      // I created this array so I can search/filter everyone who has been loaded to the screen
       let loadedList = [];
-      createUserCards(paginatedList[currentLoaded], currentLoaded);
       loadedList = [...loadedList, ...paginatedList[currentLoaded]];
+
+      createUserCards(paginatedList[currentLoaded], currentLoaded);
+
+      // Start observing last card created for lazy loading next data
       lastCardObserver.observe(document.querySelector(".card:last-child"));
       resolve({ paginatedList, currentLoaded, loadedList });
     })
@@ -37,26 +45,35 @@ const animationObserver = new IntersectionObserver(
 // Lazy loader observer
 const lastCardObserver = new IntersectionObserver((entries) => {
   const lastCard = entries[0];
-  if (!lastCard.isIntersecting) return;
-  loadNewCards();
-  lastCardObserver.unobserve(lastCard.target);
-  lastCardObserver.observe(document.querySelector(".card:last-child"));
-});
 
-function loadNewCards() {
+  // If card is not on screen, dont do anything
+  if (!lastCard.isIntersecting) return;
+
+  // This is where I load new cards to the DOM
   people.then((data) => {
+    // Update which chunked array is loaded
     data.currentLoaded += 1;
+
+    // I need this to check if the last array has been loaded
+    // If it has, then stop observing for increased page performance
     if (data.currentLoaded >= data.paginatedList.length) {
       lastCardObserver.unobserve(document.querySelector(".card:last-child"));
       return console.log("End of list");
     }
+
+    // Update this list, for search/filtering to include new cards being loaded
     data.loadedList = [
       ...data.loadedList,
       ...data.paginatedList[data.currentLoaded],
     ];
+
     createUserCards(data.paginatedList[data.currentLoaded], data.currentLoaded);
   });
-}
+
+  // Since the old card is no longer the last card, unobserve the current card and observe new last card
+  lastCardObserver.unobserve(lastCard.target);
+  lastCardObserver.observe(document.querySelector(".card:last-child"));
+});
 
 function createUserCards(people, arrIdx) {
   return people.map((person, idx) => {

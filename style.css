@@ -19,6 +19,7 @@ body {
   background: var(--bg);
 }
 
+/* Top Nav Styles */
 .search-wrapper {
   position: fixed;
   top: 0;
@@ -45,8 +46,7 @@ label {
   padding: 20px;
   border: none;
   outline: none;
-  width: 49%;
-  /* color: var(--bg); */
+  width: 49%;]
 }
 
 .search-wrapper input,
@@ -56,17 +56,12 @@ label {
   color: var(--text);
 }
 
-/* .search-wrapper select::placeholder {
-  mix-blend-mode: difference;
-}
-
-.search-wrapper::placeholder {
-  mix-blend-mode: difference;
-} */
 [data-color-picker] {
   display: none;
 }
 
+
+/* Card Styles */
 .cards-container {
   max-width: 90vw;
   margin-inline: auto;
